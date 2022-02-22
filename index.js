@@ -2,7 +2,6 @@ const inquirer = require("inquirer");
 const mysql = require("mysql2");
 require("dotenv").config();
 
-var currentDepartment_id = 0;
 const db = mysql.createConnection(
   {
     host: process.env.HOST,
@@ -25,8 +24,10 @@ async function init() {
           "view all departments",
           "view all roles",
           "view all employees",
+          "add department",
           "add a role",
           "add an employee",
+          "update an employee role",
           "Exit",
         ],
         message: "What would you like to do?",
@@ -44,15 +45,15 @@ init();
 const runTask = (answer) => {
   switch (answer.task) {
     case "view all departments":
-      view_Department();
+      view_table("department");
       break;
 
     case "view all roles":
-      view_all_roles();
+      view_table("department");
       break;
 
-    case "view all employees":
-      view_all_employees();
+    case "view all employee":
+      view_table("department");
       break;
 
     case "add an employee":
@@ -60,7 +61,17 @@ const runTask = (answer) => {
       break;
 
     case "add a role":
-      add_a_role()
+      add_role();
+
+      break;
+
+    case "add department":
+      add_department();
+
+      break;
+
+    case "update an employee role":
+      update_an_employee_role();
 
       break;
 
@@ -72,53 +83,25 @@ const runTask = (answer) => {
   }
 };
 
-const view_Department = () => {
-  init();
+const view_table = (table) => {
+  const sql = `SELECT * FROM ${table}`;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    console.log(rows);
+    setTimeout(() => {
+      init();
+    }, 2000);
+  });
 };
-
-const view_all_roles = () => {
-  init();
-};
-
-const view_all_employees = () => {
-  init();
-};
-
-
 
 const add_an_employee = () => {
   init();
 };
-
-const add_a_role=()=>{
-  if (currentDepartment_id !== 0) {
-    add_role(currentDepartment_id);
-  } else {
-    const sql = `SELECT * FROM department`;
-    let choices;
-
-    db.query(sql, (err, rows) => {
-      if (err) {
-        console.log("Database not connected");
-        return;
-      }
-
-      choices = rows;
-      inquirer
-        .prompt([
-          {
-            name: "department",
-            type: "rawlist",
-            choices: choices,
-            message: "What is the name of the department?",
-          },
-        ])
-        .then((answer) => {
-          console.log(answer);
-        });
-    });
-  }
-}
 
 const add_department = async () => {
   const answer = await inquirer.prompt([
@@ -145,7 +128,21 @@ const add_department = async () => {
   });
 };
 
-const add_role = async (department_id) => {
+const add_role = async () => {
+  let choices=[]
+  const sql = `SELECT * FROM department`;
+db.query(sql,(err, results)=>{
+  if (err) {
+    console.log(err);
+    return;
+  }
+results.map((element)=>{
+  choices.push(element.id)
+})
+
+})
+ 
+
   const answer = await inquirer.prompt([
     {
       name: "title",
@@ -157,20 +154,29 @@ const add_role = async (department_id) => {
       type: "input",
       message: "What is the salary of the role?",
     },
+    {
+      name: "department_id",
+      type: "list",
+      choices:choices,
+      message: "choose department id from the list?",
+    },
   ]);
-
-  const sql = `INSERT INTO role (title,salary,department_id)
+  const sql2 = `INSERT INTO role (title,salary,department_id)
   VALUES (?,?,?)`;
-  const params = [answer.title, answer.salary, department_id];
+  const params = [answer.title,answer.salary,192];
 
-  db.query(sql, params, (err, result) => {
+  db.query(sql2, params, (err, result) => {
     if (err) {
       console.log(err);
       return;
     }
     console.log("sucesss");
+
     init();
   });
+  
 };
+
+const update_an_employee_role = () => {};
 
 module.exports = { add_department };
