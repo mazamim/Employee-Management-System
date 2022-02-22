@@ -1,7 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 require("dotenv").config();
-const { v4: uuidv4 } = require("uuid");
 
 var currentDepartment_id = 0;
 const db = mysql.createConnection(
@@ -21,21 +20,20 @@ async function init() {
     .prompt([
       {
         name: "task",
-        type: "rawlist",
+        type: "list",
         choices: [
           "view all departments",
           "view all roles",
           "view all employees",
           "add a role",
           "add an employee",
-          "update an employee role",
           "Exit",
         ],
         message: "What would you like to do?",
       },
     ])
     .then((answer) => {
-      answer.task !== "Exit" ? runTask(answer) : console.log("bye");
+      answer.task !== "Exit" ? runTask(answer) : db.end();
     });
 
   return answer;
@@ -46,41 +44,23 @@ init();
 const runTask = (answer) => {
   switch (answer.task) {
     case "view all departments":
-      add_department();
+      view_Department();
+      break;
+
+    case "view all roles":
+      view_all_roles();
+      break;
+
+    case "view all employees":
+      view_all_employees();
+      break;
+
+    case "add an employee":
+      add_an_employee();
       break;
 
     case "add a role":
-      if (currentDepartment_id !== 0) {
-        add_role(currentDepartment_id);
-      } else {
-        const sql = `SELECT * FROM department`;
-        let choices;
-
-        db.query(sql, (err, rows) => {
-          if (err) {
-            console.log("Database not connected");
-            return;
-          }
-
-          choices = rows;
- inquirer.prompt([
-          {
-            name: "department",
-            type: "rawlist",
-            choices: choices,
-            message: "What is the name of the department?",
-          },
-        ]).then((answer)=>{
-         
-          console.log(answer)
-        })
-       
-
-        });
-
-        
-     
-      }
+      add_a_role()
 
       break;
 
@@ -92,6 +72,54 @@ const runTask = (answer) => {
   }
 };
 
+const view_Department = () => {
+  init();
+};
+
+const view_all_roles = () => {
+  init();
+};
+
+const view_all_employees = () => {
+  init();
+};
+
+
+
+const add_an_employee = () => {
+  init();
+};
+
+const add_a_role=()=>{
+  if (currentDepartment_id !== 0) {
+    add_role(currentDepartment_id);
+  } else {
+    const sql = `SELECT * FROM department`;
+    let choices;
+
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log("Database not connected");
+        return;
+      }
+
+      choices = rows;
+      inquirer
+        .prompt([
+          {
+            name: "department",
+            type: "rawlist",
+            choices: choices,
+            message: "What is the name of the department?",
+          },
+        ])
+        .then((answer) => {
+          console.log(answer);
+        });
+    });
+  }
+}
+
 const add_department = async () => {
   const answer = await inquirer.prompt([
     {
@@ -101,7 +129,7 @@ const add_department = async () => {
     },
   ]);
 
-  currentDepartment_id = uuid();
+  currentDepartment_id = Math.floor(Math.random() * 1000);
   const sql = `INSERT INTO department (id,name)
   VALUES (?,?)`;
   const params = [currentDepartment_id, answer.department];
