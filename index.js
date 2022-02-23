@@ -45,15 +45,22 @@ init();
 const runTask = (answer) => {
   switch (answer.task) {
     case "view all departments":
-      view_table("department");
+      view_table(`SELECT * FROM department`);
       break;
 
     case "view all roles":
-      view_table("department");
+      view_table(`SELECT role.id, role.title, role.salary,department.name as department_Name
+      FROM role
+      INNER JOIN department ON department.id=role.department_id`);
       break;
 
-    case "view all employee":
-      view_table("department");
+    case "view all employees":
+      view_table(`SELECT employee.id,employee.first_name,last_name,role.title,department.name,salary,manager_id  
+      FROM employee
+      JOIN role
+      on role.id=employee.role_id
+      JOIN department
+      on department.id=role.department_id`)
       break;
 
     case "add an employee":
@@ -83,8 +90,7 @@ const runTask = (answer) => {
   }
 };
 
-const view_table = (table) => {
-  const sql = `SELECT * FROM ${table}`;
+const view_table = (sql) => {
 
   db.query(sql, (err, rows) => {
     if (err) {
@@ -92,7 +98,7 @@ const view_table = (table) => {
       return;
     }
 
-    console.log(rows);
+    console.table(rows);
     setTimeout(() => {
       init();
     }, 2000);
@@ -100,6 +106,22 @@ const view_table = (table) => {
 };
 
 const add_an_employee = () => {
+
+  const sql2 = `INSERT INTO employee (first_name,last_name,role_id,manager_id)
+  VALUES (?,?,?,?)`;
+  const params = ['Mohammed','Mazahim',1,1];
+
+  db.query(sql2, params, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log("sucesss");
+
+    init();
+  });
+
+
   init();
 };
 
@@ -112,10 +134,10 @@ const add_department = async () => {
     },
   ]);
 
-  currentDepartment_id = Math.floor(Math.random() * 1000);
-  const sql = `INSERT INTO department (id,name)
-  VALUES (?,?)`;
-  const params = [currentDepartment_id, answer.department];
+
+  const sql = `INSERT INTO department (name)
+  VALUES (?)`;
+  const params = [answer.department];
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -136,8 +158,9 @@ db.query(sql,(err, results)=>{
     console.log(err);
     return;
   }
-results.map((element)=>{
-  choices.push(element.id)
+results.map((element
+  )=>{
+  choices.push(`ID - ${element.id}, Department - ${element.name}`)
 })
 
 })
@@ -158,12 +181,19 @@ results.map((element)=>{
       name: "department_id",
       type: "list",
       choices:choices,
+      filter:(name)=>{
+       let dep= name.trim()
+       let pattern=/[0-9]+/g;
+       let matches=dep.match(pattern)
+       let value=matches[0]
+       return value
+      },
       message: "choose department id from the list?",
     },
   ]);
   const sql2 = `INSERT INTO role (title,salary,department_id)
   VALUES (?,?,?)`;
-  const params = [answer.title,answer.salary,192];
+  const params = [answer.title,answer.salary,answer.department_id];
 
   db.query(sql2, params, (err, result) => {
     if (err) {
