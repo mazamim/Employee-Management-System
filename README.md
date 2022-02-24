@@ -35,9 +35,15 @@ SO THAT  can organize and plan the business
         git clone https://github.com/mazamim/Employee-Management-System.git then run npm install for dependency installation
 
      ## Usage
-            
+            ![1](https://user-images.githubusercontent.com/53158763/155464581-dd410040-5944-47a9-b22f-d1c3460c45d9.jpg)
+
+![2](https://user-images.githubusercontent.com/53158763/155464586-1bc01ab7-ec08-4176-8ed6-19b86910a526.jpg)
 
      ## Credits
 
-
+        🏆 inquirer https://www.npmjs.com/package/inquirer
+        🏆 mysql2 https://www.npmjs.com/package/mysql2
+        
      ## License
+     
+      [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
