@@ -35,7 +35,8 @@ SO THAT  can organize and plan the business
         git clone https://github.com/mazamim/Employee-Management-System.git then run npm install for dependency installation
 
      ## Usage
-            ![1](https://user-images.githubusercontent.com/53158763/155464581-dd410040-5944-47a9-b22f-d1c3460c45d9.jpg)
+            
+![1](https://user-images.githubusercontent.com/53158763/155464890-b78ffa2a-8e75-423a-a6b7-5ef950bdb7fe.jpg)
 
 ![2](https://user-images.githubusercontent.com/53158763/155464586-1bc01ab7-ec08-4176-8ed6-19b86910a526.jpg)
 
