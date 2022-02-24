@@ -80,7 +80,7 @@ const add_an_employee = async () => {
     },
   ]);
 
-  console.log(answer);
+
 
   let sql3 = `INSERT INTO employee (first_name,last_name,role_id,manager_id)
     VALUES (?,?,?,?)`;

@@ -1,13 +1,13 @@
 const inquirer = require("inquirer");
 
+const { view_table } = require("./view");
+const { add_department } = require("./add/department.js");
+const { add_an_employee } = require("./add/employee");
+const { add_role } = require("./add/role.js");
+const { updateEmpRole } = require("./update/updateEmployeeRole.js");
+const { cn } = require("./config/connection");
 
-const {view_table}=require('./view')
-const {add_department}=require('./add/department.js')
-const {add_an_employee}=require('./add/employee')
-const {add_role}=require('./add/role.js')
-
-
-const init=() =>{
+const init = () => {
   let answer = inquirer
     .prompt([
       {
@@ -27,36 +27,37 @@ const init=() =>{
       },
     ])
     .then((answer) => {
-      answer.task !== "Exit" ? runTask(answer) : db.end();
+      answer.task !== "Exit" ? runTask(answer) : process.exit(1);
     });
 
   return answer;
-}
+};
 
-init()
+init();
 
-const runTask = async(answer) => {
+const runTask = async (answer) => {
   switch (answer.task) {
     case "view all departments":
-    view_table(`SELECT * FROM department`).then((res)=>{
-      console.table(res)
-       setTimeout(() => {
-         init()
-       }, 2000);
-    })
+      view_table(`SELECT * FROM department`).then((res) => {
+        console.table(res);
+        setTimeout(() => {
+          init();
+        }, 2000);
+      });
 
-    
       break;
 
     case "view all roles":
       view_table(`SELECT role.id, role.title, role.salary,department.name as department_Name
       FROM role
-      INNER JOIN department ON department.id=role.department_id`).then((res)=>{
-        console.table(res)
-         setTimeout(() => {
-           init()
-         }, 2000);
-      })
+      INNER JOIN department ON department.id=role.department_id`).then(
+        (res) => {
+          console.table(res);
+          setTimeout(() => {
+            init();
+          }, 2000);
+        }
+      );
       break;
 
     case "view all employees":
@@ -65,64 +66,62 @@ const runTask = async(answer) => {
       JOIN role
       on role.id=employee.role_id
       JOIN department
-      on department.id=role.department_id`).then((res)=>{
-        console.table(res)
-         setTimeout(() => {
-           init()
-         }, 2000);
-      })
+      on department.id=role.department_id`).then((res) => {
+        console.table(res);
+        setTimeout(() => {
+          init();
+        }, 2000);
+      });
       break;
 
     case "add an employee":
-       add_an_employee().then(()=>{
-      
-        console.log(`New Employee added to the database`)
-         setTimeout(() => {
-           init()
-         }, 2000);
-      })
+      add_an_employee().then(() => {
+        console.log(`New Employee added to the database`);
+        setTimeout(() => {
+          init();
+        }, 2000);
+      });
       break;
 
     case "add a role":
-       add_role().then(()=>{
-      
-        console.log(`New Role added to the database`)
-         setTimeout(() => {
-           init()
-         }, 2000);
-      })
+      add_role().then(() => {
+        console.log(`New Role added to the database`);
+        setTimeout(() => {
+          init();
+        }, 2000);
+      });
 
       break;
 
     case "add department":
-      add_department().then(()=>{
-      
-        console.log(`New Department added to the database`)
-         setTimeout(() => {
-           init()
-         }, 2000);
-      })
+      add_department().then(() => {
+        console.log(`New Department added to the database`);
+        setTimeout(() => {
+          init();
+        }, 2000);
+      });
 
       break;
 
     case "update an employee role":
-      // update_an_employee_role();
+  
+   updateEmpRole()
+   .then((result)=>{
+console.log('updated')
+setTimeout(() => {
+  init();
+}, 2000);
+   })
+   .catch((err)=>{
+     console.log(err)
+   })
+
 
       break;
-
-    case "Exit":
-      break;
-
+      
     default:
       break;
   }
 };
-
-module.exports={init}
-
-
-
-
-
 
 
