@@ -1,20 +1,13 @@
 const inquirer = require("inquirer");
-const mysql = require("mysql2");
-require("dotenv").config();
 
-const db = mysql.createConnection(
-  {
-    host: process.env.HOST,
-    // MySQL username,
-    user: process.env.USER,
-    // MySQL password
-    password: process.env.PASSWORD,
-    database: process.env.DB,
-  },
-  console.log(`Connected to the database.`)
-);
 
-async function init() {
+const {view_table}=require('./view')
+const {add_department}=require('./add/department.js')
+const {add_an_employee}=require('./add/employee')
+const {add_role}=require('./add/role.js')
+
+
+const init=() =>{
   let answer = inquirer
     .prompt([
       {
@@ -40,18 +33,30 @@ async function init() {
   return answer;
 }
 
-init();
+init()
 
-const runTask = (answer) => {
+const runTask = async(answer) => {
   switch (answer.task) {
     case "view all departments":
-      view_table(`SELECT * FROM department`);
+    view_table(`SELECT * FROM department`).then((res)=>{
+      console.table(res)
+       setTimeout(() => {
+         init()
+       }, 2000);
+    })
+
+    
       break;
 
     case "view all roles":
       view_table(`SELECT role.id, role.title, role.salary,department.name as department_Name
       FROM role
-      INNER JOIN department ON department.id=role.department_id`);
+      INNER JOIN department ON department.id=role.department_id`).then((res)=>{
+        console.table(res)
+         setTimeout(() => {
+           init()
+         }, 2000);
+      })
       break;
 
     case "view all employees":
@@ -60,25 +65,48 @@ const runTask = (answer) => {
       JOIN role
       on role.id=employee.role_id
       JOIN department
-      on department.id=role.department_id`)
+      on department.id=role.department_id`).then((res)=>{
+        console.table(res)
+         setTimeout(() => {
+           init()
+         }, 2000);
+      })
       break;
 
     case "add an employee":
-      add_an_employee();
+       add_an_employee().then(()=>{
+      
+        console.log(`New Employee added to the database`)
+         setTimeout(() => {
+           init()
+         }, 2000);
+      })
       break;
 
     case "add a role":
-      add_role();
+       add_role().then(()=>{
+      
+        console.log(`New Role added to the database`)
+         setTimeout(() => {
+           init()
+         }, 2000);
+      })
 
       break;
 
     case "add department":
-      add_department();
+      add_department().then(()=>{
+      
+        console.log(`New Department added to the database`)
+         setTimeout(() => {
+           init()
+         }, 2000);
+      })
 
       break;
 
     case "update an employee role":
-      update_an_employee_role();
+      // update_an_employee_role();
 
       break;
 
@@ -90,123 +118,11 @@ const runTask = (answer) => {
   }
 };
 
-const view_table = (sql) => {
-
-  db.query(sql, (err, rows) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-
-    console.table(rows);
-    setTimeout(() => {
-      init();
-    }, 2000);
-  });
-};
-
-const add_an_employee = () => {
-
-  const sql2 = `INSERT INTO employee (first_name,last_name,role_id,manager_id)
-  VALUES (?,?,?,?)`;
-  const params = ['Mohammed','Mazahim',1,1];
-
-  db.query(sql2, params, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log("sucesss");
-
-    init();
-  });
+module.exports={init}
 
 
-  init();
-};
-
-const add_department = async () => {
-  const answer = await inquirer.prompt([
-    {
-      name: "department",
-      type: "input",
-      message: "What is the name of the department?",
-    },
-  ]);
 
 
-  const sql = `INSERT INTO department (name)
-  VALUES (?)`;
-  const params = [answer.department];
 
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log("sucesss");
 
-    init();
-  });
-};
 
-const add_role = async () => {
-  let choices=[]
-  const sql = `SELECT * FROM department`;
-db.query(sql,(err, results)=>{
-  if (err) {
-    console.log(err);
-    return;
-  }
-results.map((element
-  )=>{
-  choices.push(`ID - ${element.id}, Department - ${element.name}`)
-})
-
-})
- 
-
-  const answer = await inquirer.prompt([
-    {
-      name: "title",
-      type: "input",
-      message: "What is the name of your role?",
-    },
-    {
-      name: "salary",
-      type: "input",
-      message: "What is the salary of the role?",
-    },
-    {
-      name: "department_id",
-      type: "list",
-      choices:choices,
-      filter:(name)=>{
-       let dep= name.trim()
-       let pattern=/[0-9]+/g;
-       let matches=dep.match(pattern)
-       let value=matches[0]
-       return value
-      },
-      message: "choose department id from the list?",
-    },
-  ]);
-  const sql2 = `INSERT INTO role (title,salary,department_id)
-  VALUES (?,?,?)`;
-  const params = [answer.title,answer.salary,answer.department_id];
-
-  db.query(sql2, params, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log("sucesss");
-
-    init();
-  });
-  
-};
-
-const update_an_employee_role = () => {};
-
-module.exports = { add_department };
